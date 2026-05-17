@@ -1,29 +1,73 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
+from app.models import Tarefa
+from app.database import tarefas
 
-app = FastAPI(title="Mini API de Tarefas")
-
-
-class Task(BaseModel):
-    id: int
-    titulo: str
-    concluida: bool = False
-
-
-tasks = []
-
+app = FastAPI()
 
 @app.get("/")
 def home():
-    return {"mensagem": "API funcionando com sucesso"}
+    return {"message": "API funcionando!"}
 
 
 @app.get("/tarefas")
 def listar_tarefas():
-    return tasks
+    return tarefas
 
 
 @app.post("/tarefas")
-def criar_tarefa(task: Task):
-    tasks.append(task.dict())
-    return task
+def criar_tarefa(tarefa: Tarefa):
+    tarefas.append(tarefa.dict())
+
+    return {
+        "mensagem": "Tarefa criada com sucesso",
+        "tarefa": tarefa
+    }
+
+
+@app.get("/tarefas/{tarefa_id}")
+def buscar_tarefa(tarefa_id: int):
+
+    for tarefa in tarefas:
+        if tarefa["id"] == tarefa_id:
+            return tarefa
+
+    raise HTTPException(
+        status_code=404,
+        detail="Tarefa não encontrada"
+    )
+
+
+@app.put("/tarefas/{tarefa_id}")
+def atualizar_tarefa(tarefa_id: int, nova_tarefa: Tarefa):
+
+    for index, tarefa in enumerate(tarefas):
+
+        if tarefa["id"] == tarefa_id:
+            tarefas[index] = nova_tarefa.dict()
+
+            return {
+                "mensagem": "Tarefa atualizada"
+            }
+
+    raise HTTPException(
+        status_code=404,
+        detail="Tarefa não encontrada"
+    )
+
+
+@app.delete("/tarefas/{tarefa_id}")
+def deletar_tarefa(tarefa_id: int):
+
+    for index, tarefa in enumerate(tarefas):
+
+        if tarefa["id"] == tarefa_id:
+            tarefas.pop(index)
+
+            return {
+                "mensagem": "Tarefa removida"
+            }
+
+    raise HTTPException(
+        status_code=404,
+        detail="Tarefa não encontrada"
+    )
