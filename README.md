@@ -21,3 +21,10 @@ Projeto desenvolvido com Python e FastAPI.
 
 ```bash
 uvicorn app.main:app --reload
+
+## Funcionalidades
+
+- CRUD completo de tarefas
+- FastAPI
+- Testes automatizados com Pytest
+- Documentação Swagger
